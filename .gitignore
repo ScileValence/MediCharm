@@ -1,0 +1,21 @@
+# Create .gitignore at project root
+cat > .gitignore << 'EOF'
+# Maven
+backend/target/
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Uploads
+backend/uploads/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Sensitive — override application.properties locally, don't commit real credentials
+# backend/src/main/resources/application.properties
+EOF

@@ -1,0 +1,316 @@
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+###
+# ===========================================================
+# Admin Module (v1.5) — run create_admin.sql once first
+# ===========================================================
+
+### Admin login (reuses the normal patient login endpoint;
+### CustomUserDetailsService grants ROLE_ADMIN because role=ADMIN)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@medicharm.com",
+  "password": "Admin@123"
+}
+
+### Copy the "token" value from the login response above and paste it
+### below to authenticate the remaining admin requests.
+
+### Dashboard stats
+GET http://localhost:8080/api/admin/stats
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### List all patients
+GET http://localhost:8080/api/admin/users
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Delete a patient (also removes their appointments + reports)
+DELETE http://localhost:8080/api/admin/users/1
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### List all appointments (including cancelled ones, unlike the
+### patient/doctor-facing endpoints which hide cancelled records)
+GET http://localhost:8080/api/admin/appointments
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Cancel an appointment as admin
+PUT http://localhost:8080/api/admin/appointments/1/cancel
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Permanently delete an appointment record
+DELETE http://localhost:8080/api/admin/appointments/1
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### List all medicine orders
+GET http://localhost:8080/api/admin/orders
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Cancel an order as admin
+PUT http://localhost:8080/api/admin/orders/1/cancel
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Permanently delete an order record
+DELETE http://localhost:8080/api/admin/orders/1
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### List all medical reports
+GET http://localhost:8080/api/admin/reports
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Permanently delete a report (also deletes its file attachment)
+DELETE http://localhost:8080/api/admin/reports/1
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### List all doctors (any status — public endpoint, no token needed)
+GET http://localhost:8080/api/doctors/all
+
+### Approve a pending doctor (admin-only)
+PUT http://localhost:8080/api/doctors/approve/1
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Reject a pending doctor (admin-only)
+PUT http://localhost:8080/api/doctors/reject/1
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Suspend an approved doctor (admin-only)
+PUT http://localhost:8080/api/doctors/suspend/1
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+###
+# ===========================================================
+# Appointment status transitions (doctor/admin only)
+# ===========================================================
+
+### Doctor login (to get a doctor token for the requests below)
+POST http://localhost:8080/api/auth/doctor/login
+Content-Type: application/json
+
+{
+  "email": "doctor@example.com",
+  "password": "password123"
+}
+
+### Confirm a pending appointment
+PUT http://localhost:8080/api/appointments/1/confirm
+Authorization: Bearer PASTE_DOCTOR_TOKEN_HERE
+
+### Reject a pending appointment
+PUT http://localhost:8080/api/appointments/1/reject
+Authorization: Bearer PASTE_DOCTOR_TOKEN_HERE
+
+### Mark a confirmed appointment as completed
+PUT http://localhost:8080/api/appointments/1/complete
+Authorization: Bearer PASTE_DOCTOR_TOKEN_HERE
+
+### Full appointment history for a patient (includes cancelled/rejected)
+GET http://localhost:8080/api/appointments/user/1/history
+Authorization: Bearer PASTE_PATIENT_TOKEN_HERE
+
+###
+# ===========================================================
+# Admin-created doctors
+# ===========================================================
+
+### Create a new doctor directly (auto-approved, no pending review)
+POST http://localhost:8080/api/admin/doctors
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Dr. Priya Nambiar",
+  "email": "priya.nambiar@medicharm.com",
+  "password": "TempPass123",
+  "dept": "Endocrinology",
+  "phone": "9999999999",
+  "qualification": "MBBS, MD (Endocrinology)",
+  "specialization": "Diabetes & Thyroid Disorders",
+  "experienceYears": 8,
+  "consultationFee": 600,
+  "hospital": "MediCharm Central"
+}
+
+###
+# ===========================================================
+# Ownership checks (should return 403 when the IDs don't match
+# the logged-in caller)
+# ===========================================================
+
+### Logged in as patient A, try to read patient B's appointments
+### -> expect 403 "You are not authorized to view these appointments"
+GET http://localhost:8080/api/appointments/user/999
+Authorization: Bearer PASTE_PATIENT_A_TOKEN_HERE
+
+### Logged in as patient A, try to read patient B's order history
+### -> expect 403 "You are not authorized to view these orders"
+GET http://localhost:8080/api/orders/user/999
+Authorization: Bearer PASTE_PATIENT_A_TOKEN_HERE
+
+### Logged in as patient A, try to cancel patient B's order
+### -> expect 403 "You are not authorized to cancel this order"
+PUT http://localhost:8080/api/orders/999/cancel
+Authorization: Bearer PASTE_PATIENT_A_TOKEN_HERE
+
+### Logged in as patient A, try to read patient B's medical reports
+### -> expect 403 "You are not authorized to view these reports"
+GET http://localhost:8080/api/reports/user/999
+Authorization: Bearer PASTE_PATIENT_A_TOKEN_HERE
+
+### Logged in as Doctor X, try to confirm an appointment assigned
+### to Doctor Y -> expect 403 "You are not authorized to act on this appointment"
+PUT http://localhost:8080/api/appointments/999/confirm
+Authorization: Bearer PASTE_OTHER_DOCTOR_TOKEN_HERE
+
+### Try to cancel an appointment that is already COMPLETED
+### -> expect 500 with message "Cannot cancel an appointment that is already completed"
+PUT http://localhost:8080/api/appointments/1/cancel
+Authorization: Bearer PASTE_PATIENT_TOKEN_HERE
+
+###
+# ===========================================================
+# Profile management
+# ===========================================================
+
+### Patient: view my profile
+GET http://localhost:8080/api/profile/me
+Authorization: Bearer PASTE_PATIENT_TOKEN_HERE
+
+### Patient: update my name
+PUT http://localhost:8080/api/profile/me
+Authorization: Bearer PASTE_PATIENT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Updated Patient Name"
+}
+
+### Patient: change my password
+PUT http://localhost:8080/api/profile/password
+Authorization: Bearer PASTE_PATIENT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newPassword456"
+}
+
+### Doctor: view my profile
+GET http://localhost:8080/api/doctors/me
+Authorization: Bearer PASTE_DOCTOR_TOKEN_HERE
+
+### Doctor: update my professional details
+PUT http://localhost:8080/api/doctors/me
+Authorization: Bearer PASTE_DOCTOR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Dr. Updated Name",
+  "phone": "9876543210",
+  "dept": "Cardiology",
+  "qualification": "MBBS, MD",
+  "specialization": "Interventional Cardiology",
+  "experienceYears": 12,
+  "consultationFee": 800,
+  "hospital": "MediCharm Central",
+  "available": false
+}
+
+### Doctor: change my password
+PUT http://localhost:8080/api/doctors/password
+Authorization: Bearer PASTE_DOCTOR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "currentPassword": "TempPass123",
+  "newPassword": "newDoctorPassword456"
+}
+
+###
+# ===========================================================
+# Forgot / reset password
+# ===========================================================
+
+### Request a reset link (patient). Always returns the same generic
+### success message whether or not the email exists. If SMTP isn't
+### configured in application.properties, check the backend console
+### output for the reset link instead of an inbox.
+POST http://localhost:8080/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "accountType": "PATIENT"
+}
+
+### Request a reset link (doctor)
+POST http://localhost:8080/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "priya.nambiar@medicharm.com",
+  "accountType": "DOCTOR"
+}
+
+### Complete the reset using the token from the email (or console log)
+POST http://localhost:8080/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "PASTE_TOKEN_FROM_EMAIL_OR_CONSOLE_HERE",
+  "newPassword": "myNewPassword789"
+}
+
+### Admin: generate a temporary password for a doctor (no email
+### needed — returns the plaintext temp password once, in the response)
+POST http://localhost:8080/api/admin/doctors/1/reset-password
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+### Admin: generate a temporary password for a patient
+POST http://localhost:8080/api/admin/users/1/reset-password
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+###
+# ===========================================================
+# In-app notifications
+# ===========================================================
+
+### Get my notifications (works for either a patient or doctor token —
+### the backend resolves which based on the JWT's role)
+GET http://localhost:8080/api/notifications/me
+Authorization: Bearer PASTE_PATIENT_OR_DOCTOR_TOKEN_HERE
+
+### Get my unread count (polled by the frontend bell every 30s)
+GET http://localhost:8080/api/notifications/unread-count
+Authorization: Bearer PASTE_PATIENT_OR_DOCTOR_TOKEN_HERE
+
+### Mark a single notification as read
+PUT http://localhost:8080/api/notifications/1/read
+Authorization: Bearer PASTE_PATIENT_OR_DOCTOR_TOKEN_HERE
+
+### Mark all of my notifications as read
+PUT http://localhost:8080/api/notifications/read-all
+Authorization: Bearer PASTE_PATIENT_OR_DOCTOR_TOKEN_HERE
+
+### End-to-end test: schedule an appointment as a patient, then check
+### GET /api/notifications/me with the DOCTOR's token — should show
+### a new "New appointment request" notification.
+POST http://localhost:8080/api/appointments/schedule
+Authorization: Bearer PASTE_PATIENT_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "userId": "1",
+  "department": "Cardiology",
+  "doctor": "Dr. Arjun Mehta",
+  "date": "2026-07-15",
+  "time": "10:30",
+  "description": "Routine checkup"
+}

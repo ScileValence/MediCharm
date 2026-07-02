@@ -1,0 +1,434 @@
+/* src/index.css ---------------------------------------------------
+   MediCharm design system.
+
+   Principles (from the design brief):
+   - One brand hue (teal), desaturated and calm — never decorative.
+   - A real neutral gray scale for all structural UI.
+   - Saturated color reserved strictly for status (confirmed/pending/
+     cancelled) — and status is never color alone, always paired
+     with a text label (+ icon where space allows).
+   - Soft shadows + hairline borders, not hard outlines.
+   - One quiet signature device: a 3px colored left-edge bar on any
+     card that represents something with a status. It's the one
+     recurring structural idea this app is built around — status at
+     a glance — rather than a decorative flourish.
+------------------------------------------------------------------- */
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+:root {
+  /* ---- Brand (teal family, desaturated from the old #009688) ---- */
+  --brand-50:  #EAF4F3;
+  --brand-100: #D3E8E6;
+  --brand-500: #0E7C7B;
+  --brand-600: #0B6160;
+  --brand-700: #094B4A;
+
+  /* ---- Neutrals (the actual structural backbone of the UI) ---- */
+  --gray-0:   #FFFFFF;
+  --gray-50:  #FAFBFB;
+  --gray-100: #F1F4F4;
+  --gray-200: #E3E8E8;
+  --gray-300: #CBD3D3;
+  --gray-400: #9CA6A7;
+  --gray-500: #6B7677;
+  --gray-700: #3D4647;
+  --gray-900: #1C2526;
+
+  /* ---- Status (muted, never used decoratively, never alone) ---- */
+  --status-confirmed:      #1A9F5C;
+  --status-confirmed-tint: #E7F6EE;
+  --status-pending:        #C8790A;
+  --status-pending-tint:   #FBF0DE;
+  --status-cancelled:      #D6453D;
+  --status-cancelled-tint: #FBE9E8;
+  --status-info:           #3B7DD8;
+  --status-info-tint:      #E9F1FC;
+
+  /* ---- Legacy aliases kept so existing .btn-teal / text-teal
+     classes across the app keep working without a rewrite of every
+     page in one pass — they now resolve to the calmer brand tone. ---- */
+  --teal: var(--brand-500);
+  --teal-dark: var(--brand-600);
+  --muted: var(--gray-500);
+  --card-border: var(--gray-200);
+  --soft-shadow: 0 1px 2px rgba(28,37,38,0.04), 0 4px 16px rgba(28,37,38,0.06);
+  --radius: 0.875rem;
+  --radius-sm: 0.5rem;
+}
+
+/* ============================== Base ============================== */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--gray-50);
+  color: var(--gray-900);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Lexend", "Inter", sans-serif;
+  color: var(--gray-900);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-weight: 700; }
+
+p { color: var(--gray-700); }
+
+a {
+  color: var(--brand-500);
+}
+a:hover {
+  color: var(--brand-600);
+}
+
+small, .text-muted {
+  color: var(--gray-500) !important;
+}
+
+/* Visible keyboard focus everywhere — quality floor, not optional. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================== Navbar ============================== */
+.navbar {
+  background-color: var(--gray-0);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: none;
+}
+.navbar-brand {
+  font-family: "Lexend", sans-serif;
+  color: var(--brand-600) !important;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
+}
+.nav-link {
+  color: var(--gray-700) !important;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+.nav-link:hover {
+  color: var(--brand-500) !important;
+}
+
+/* ============================== Buttons ============================== */
+.btn {
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-teal,
+.btn-primary {
+  background-color: var(--brand-500);
+  border-color: var(--brand-500);
+  color: #fff;
+}
+.btn-teal:hover,
+.btn-primary:hover {
+  background-color: var(--brand-600);
+  border-color: var(--brand-600);
+  color: #fff;
+}
+
+.btn-outline-teal,
+.btn-outline-primary {
+  border: 1.5px solid var(--brand-500);
+  color: var(--brand-500);
+  background: transparent;
+}
+.btn-outline-teal:hover,
+.btn-outline-primary:hover {
+  background-color: var(--brand-50);
+  border-color: var(--brand-500);
+  color: var(--brand-600);
+}
+
+.btn-outline-secondary {
+  border: 1.5px solid var(--gray-300);
+  color: var(--gray-700);
+}
+.btn-outline-secondary:hover {
+  background-color: var(--gray-100);
+  border-color: var(--gray-300);
+  color: var(--gray-900);
+}
+
+/* Bootstrap text-color utilities, remapped so any page still using
+   text-primary/text-success/etc. (instead of the design tokens
+   directly) renders in the same brand/status palette rather than
+   Bootstrap's stock blue/green — prevents a patchwork of slightly
+   different blues and greens across pages that haven't all been
+   rebuilt in the same pass. */
+.text-primary {
+  color: var(--brand-500) !important;
+}
+.text-success {
+  color: var(--status-confirmed) !important;
+}
+.text-danger {
+  color: var(--status-cancelled) !important;
+}
+.text-warning {
+  color: var(--status-pending) !important;
+}
+.text-info {
+  color: var(--status-info) !important;
+}
+.btn-success {
+  background-color: var(--status-confirmed);
+  border-color: var(--status-confirmed);
+  color: #fff;
+}
+.btn-success:hover {
+  filter: brightness(0.92);
+}
+.btn-outline-success {
+  border: 1.5px solid var(--status-confirmed);
+  color: var(--status-confirmed);
+}
+.btn-outline-success:hover {
+  background-color: var(--status-confirmed-tint);
+}
+.btn-danger {
+  background-color: var(--status-cancelled);
+  border-color: var(--status-cancelled);
+  color: #fff;
+}
+.btn-danger:hover {
+  filter: brightness(0.92);
+}
+.btn-outline-danger {
+  border: 1.5px solid var(--status-cancelled);
+  color: var(--status-cancelled);
+}
+.btn-outline-danger:hover {
+  background-color: var(--status-cancelled-tint);
+}
+
+/* ============================== Cards ============================== */
+.card {
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--soft-shadow);
+  background-color: var(--gray-0);
+}
+.card-title {
+  color: var(--gray-900);
+  font-family: "Lexend", sans-serif;
+}
+
+/* Hover lift used selectively (clickable cards only), not globally —
+   a card you can't act on shouldn't visually invite a click. */
+.hover-shadow {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.hover-shadow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(28,37,38,0.06), 0 12px 24px rgba(28,37,38,0.08);
+}
+
+/* The signature device: a colored left-edge bar denoting status,
+   used on appointment/order/report cards throughout the app. Pair
+   with a .status-pill (below) — the bar reinforces at a glance,
+   it never stands alone as the only signal. */
+.status-card {
+  position: relative;
+  border-left: 3px solid var(--gray-200);
+  padding-left: 1rem;
+}
+.status-card--confirmed { border-left-color: var(--status-confirmed); }
+.status-card--pending   { border-left-color: var(--status-pending); }
+.status-card--cancelled { border-left-color: var(--status-cancelled); }
+.status-card--info      { border-left-color: var(--status-info); }
+
+/* ============================== Status pills ============================== */
+/* Always icon + label + color — never color alone. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.status-pill svg {
+  width: 0.85em;
+  height: 0.85em;
+  flex-shrink: 0;
+}
+.status-pill--confirmed {
+  background: var(--status-confirmed-tint);
+  color: var(--status-confirmed);
+}
+.status-pill--pending {
+  background: var(--status-pending-tint);
+  color: var(--status-pending);
+}
+.status-pill--cancelled {
+  background: var(--status-cancelled-tint);
+  color: var(--status-cancelled);
+}
+.status-pill--info {
+  background: var(--status-info-tint);
+  color: var(--status-info);
+}
+.status-pill--neutral {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+/* ============================== Tag chips ============================== */
+/* Used for specialty/department/role tags on doctor & patient cards. */
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--brand-50);
+  color: var(--brand-600);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* ============================== Sidebar / layout ============================== */
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  border-right: 1px solid var(--gray-200);
+  background: var(--gray-0);
+}
+.main-content {
+  min-height: 100vh;
+}
+.offcanvas-start {
+  width: 280px;
+}
+
+/* ============================== Tables (admin/doctor density views) ============================== */
+.table thead {
+  background-color: var(--gray-50);
+  color: var(--gray-700);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--gray-200);
+}
+.table tbody td {
+  color: var(--gray-900);
+  vertical-align: middle;
+}
+.table-hover tbody tr:hover {
+  background-color: var(--gray-50) !important;
+}
+
+/* ============================== Footer ============================== */
+footer {
+  background-color: var(--gray-0);
+  color: var(--gray-500);
+  border-top: 1px solid var(--gray-200);
+  padding: 1.25rem 0;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+footer a {
+  color: var(--gray-700);
+}
+
+/* ============================== Empty / Loading / Error states ============================== */
+/* Designed explicitly per the brief, reused everywhere via the
+   <EmptyState>, <LoadingState>, and <ErrorState> components rather
+   than ad hoc per-page markup. */
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-radius: var(--radius);
+}
+.state-block__icon {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 1rem;
+  color: var(--gray-400);
+}
+.state-block__title {
+  font-family: "Lexend", sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--gray-900);
+  margin-bottom: 0.35rem;
+}
+.state-block__body {
+  color: var(--gray-500);
+  font-size: 0.9rem;
+  max-width: 32ch;
+  margin-bottom: 1rem;
+}
+.state-block--error .state-block__icon {
+  color: var(--status-cancelled);
+}
+
+/* Skeleton loading — calmer than a spinner for content-shaped
+   placeholders (cards, list rows); spinners are reserved for short,
+   indeterminate actions like a button submit. */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-100) 25%,
+    var(--gray-200) 37%,
+    var(--gray-100) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-sweep 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes skeleton-sweep {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--gray-100);
+  }
+}
+
+/* ============================== Responsive ============================== */
+@media (max-width: 767.98px) {
+  .sidebar { display: none; }
+  .main-content { padding: 1rem; }
+}
+@media (min-width: 768px) {
+  .offcanvas-backdrop { display: none; }
+}
