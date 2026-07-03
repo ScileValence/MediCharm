@@ -57,6 +57,14 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                             "/v3/api-docs/**"
                     ).permitAll()
 
+                    // Render (and any other host) pings this to confirm
+                    // the service is alive. Only /health is opened up —
+                    // other actuator endpoints stay locked down since
+                    // they can expose internal details.
+                    .requestMatchers(
+                            "/actuator/health"
+                    ).permitAll()
+
                     .requestMatchers(
                             "/api/auth/**"
                     ).permitAll()
@@ -78,11 +86,6 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                             "/api/admin/**"
                     ).hasRole("ADMIN")
 
-                    // Doctor approval/rejection/suspension and deletion
-                    // are admin-only management actions. These must be
-                    // locked down explicitly because they share the
-                    // /api/doctors/** prefix with the public browse
-                    // endpoints listed above.
                     .requestMatchers(
                             "/api/doctors/approve/**",
                             "/api/doctors/reject/**",
@@ -90,13 +93,6 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                             "/api/doctors/status/**"
                     ).hasRole("ADMIN")
 
-                    // Doctor self-service profile management. These
-                    // resolve identity from the JWT, not from a path
-                    // parameter, so there's no id for one doctor to
-                    // substitute to reach another doctor's record —
-                    // restricting to ROLE_DOCTOR just keeps patients
-                    // and admins from hitting "my profile" routes
-                    // that don't apply to them.
                     .requestMatchers(
                             "/api/doctors/me",
                             "/api/doctors/password"
@@ -107,8 +103,6 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                             "/api/doctors/**"
                     ).hasRole("ADMIN")
 
-                    // Medicine catalog management (add/delete) is
-                    // admin-only; browsing medicines stays public above.
                     .requestMatchers(
                             "/api/medicines/add"
                     ).hasRole("ADMIN")
@@ -125,12 +119,6 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                             "ADMIN"
                     )
 
-                    // Confirming, completing, or rejecting an
-                    // appointment is a clinical decision that only the
-                    // assigned doctor (or an admin) should be able to
-                    // make. Scheduling and cancelling stay open to any
-                    // authenticated user via the anyRequest() rule
-                    // below, since patients need to do both of those.
                     .requestMatchers(
                             HttpMethod.PUT,
                             "/api/appointments/*/confirm",
