@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: medicharm-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: medicharm-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: medicharm-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: medicharm-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: medicharm-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: medicharm-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      # Set these two manually in the Render dashboard after your
+      # Vercel frontend is live — they can't be known at blueprint time.
+      #   FRONTEND_URL         = https://medicharm.vercel.app
+      #   APP_ALLOWED_ORIGINS  = https://medicharm.vercel.app,http://localhost:5173
+      - key: FRONTEND_URL
+        sync: false
+      - key: APP_ALLOWED_ORIGINS
+        sync: false
+
+databases:
+  - name: medicharm-db
+    plan: free
+    databaseName: medicharm
+    user: medicharm

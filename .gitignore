@@ -1,0 +1,23 @@
+# Maven
+backend/target/
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Uploads
+backend/uploads/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Environment files — never commit real credentials or URLs
+frontend/.env
+frontend/.env.production
+frontend/.env.local
+
+# Sensitive — override application.properties locally, don't commit real credentials
+# backend/src/main/resources/application.properties
